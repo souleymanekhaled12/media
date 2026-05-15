@@ -20,7 +20,7 @@ export function Header() {
         role="navigation"
         aria-label="Menu principal"
       >
-        <div className="max-w-[1320px] mx-auto px-6 flex items-center h-full gap-0 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center h-full gap-0 relative">
           <Logo />
 
           <div className="w-px h-7 bg-[#CCCAC3] dark:bg-[#3a3a4e] mx-5 shrink-0 hidden lg:block" aria-hidden="true" />

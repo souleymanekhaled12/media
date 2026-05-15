@@ -30,7 +30,7 @@ const sourceSerif = Source_Serif_4({
 export const metadata: Metadata = {
   title: {
     default: `${siteConfig.name} | Média numérique international premium`,
-    template: `%s | ${siteConfig.name}`,
+    template: `${siteConfig.name} - %s`,
   },
   description: siteConfig.description,
   metadataBase: new URL(siteConfig.url),
