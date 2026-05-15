@@ -10,6 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
+  const khaled = authors[0];
+
   return (
     <div className="py-12 lg:py-16">
       <div className="max-w-[820px] mx-auto px-6">
@@ -24,7 +26,7 @@ export default function AboutPage() {
             conviction que le journalisme de qualité est essentiel à la démocratie.
           </p>
           <p>
-            Notre rédaction, composée de journalistes expérimentés et passionnés, couvre
+            Dirigée par un rédacteur en chef passionné et rigoureux, Ligne Rouge couvre
             l&apos;actualité politique, économique, technologique, culturelle et sportive avec
             rigueur et indépendance.
           </p>
@@ -69,38 +71,35 @@ export default function AboutPage() {
         <div className="mb-6 pb-3 border-b-2 border-[#DEDBD4] dark:border-[#2a2a3e]">
           <h2 className="font-serif text-xl font-bold text-[#0D1B2A] dark:text-white flex items-center gap-2.5">
             <span className="w-[3px] h-5 bg-[#C01D35] rounded-sm block shrink-0" />
-            Notre équipe
+            Le Rédacteur en Chef
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {authors.map((author) => (
-            <Link
-              key={author.id}
-              href={`/author/${author.slug}`}
-              className="flex items-start gap-4 p-5 rounded-lg border border-[#DEDBD4] dark:border-[#2a2a3e] hover:border-[#C01D35] hover:shadow-md transition-all group"
-            >
-              <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0">
-                <Image
-                  src={author.avatar}
-                  alt={author.name}
-                  fill
-                  className="object-cover"
-                  sizes="64px"
-                />
-              </div>
-              <div>
-                <h3 className="font-serif font-bold text-[#0D1B2A] dark:text-white group-hover:text-[#C01D35] transition-colors">
-                  {author.name}
-                </h3>
-                <div className="text-xs text-[#C01D35] font-semibold uppercase tracking-wider mb-2">
-                  {author.role}
-                </div>
-                <p className="text-sm text-[#7A7A7A] line-clamp-2">{author.bio}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <Link
+          href={`/author/${khaled.slug}`}
+          className="flex flex-col sm:flex-row items-center sm:items-start gap-6 p-6 rounded-xl border border-[#DEDBD4] dark:border-[#2a2a3e] hover:border-[#C01D35] hover:shadow-md transition-all group"
+        >
+          <div className="relative w-32 h-32 rounded-xl overflow-hidden shrink-0">
+            <Image
+              src={khaled.avatar}
+              alt={khaled.name}
+              fill
+              className="object-cover"
+              sizes="128px"
+            />
+          </div>
+          <div className="text-center sm:text-left">
+            <h3 className="font-serif text-2xl font-bold text-[#0D1B2A] dark:text-white group-hover:text-[#C01D35] transition-colors">
+              {khaled.name}
+            </h3>
+            <div className="text-xs text-[#C01D35] font-bold uppercase tracking-wider mb-3">
+              {khaled.role}
+            </div>
+            <p className="text-sm text-[#4A4A4A] dark:text-[#a0a0b0] leading-relaxed">
+              {khaled.bio}
+            </p>
+          </div>
+        </Link>
       </div>
     </div>
   );
