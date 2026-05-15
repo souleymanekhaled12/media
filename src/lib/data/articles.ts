@@ -4,6 +4,46 @@ import { authors } from "./authors";
 
 export const articles: Article[] = [
   {
+    id: "art-0",
+    slug: "ligne-rouge-lancement-plateforme-information-internationale",
+    title: "Ligne Rouge : naissance d'une plateforme d'information internationale indépendante",
+    subtitle: "Le premier éditorial du rédacteur en chef — une vision pour un journalisme numérique rigoureux et accessible",
+    excerpt: "Ligne Rouge voit le jour avec une ambition claire : offrir une information vérifiée, structurée et d'intérêt public, à la croisée du journalisme d'investigation et de la maîtrise technologique.",
+    body: `<p>Aujourd'hui marque le lancement officiel de <strong>Ligne Rouge</strong>, une plateforme d'information internationale conçue pour répondre aux exigences d'un monde en constante mutation. Ce projet est le fruit d'une conviction profonde : le journalisme de qualité n'est pas un luxe, c'est une nécessité démocratique.</p>
+<h2>Pourquoi Ligne Rouge ?</h2>
+<p>Dans un paysage médiatique saturé par l'instantanéité et la désinformation, il manquait un espace dédié à l'analyse rigoureuse, au recoupement systématique des sources et à la mise en perspective des événements. Ligne Rouge comble ce vide.</p>
+<p>Le nom « Ligne Rouge » symbolise notre engagement : il y a des principes que nous ne franchirons jamais — la vérité des faits, l'indépendance éditoriale, et le respect du public.</p>
+<h2>Notre approche</h2>
+<p>Originaire de Kouandé, formé au Collège Saint-Augustin de Natitingou, j'ai consacré ma carrière à la jonction entre journalisme et technologie. Cette double compétence est au cœur de Ligne Rouge : chaque article est non seulement vérifié selon les standards les plus exigeants du métier, mais aussi optimisé pour être accessible, rapide et agréable à lire sur tous les supports.</p>
+<blockquote>« L'information n'a de valeur que si elle est fiable, accessible et utile au citoyen. C'est la promesse de Ligne Rouge. »</blockquote>
+<h2>Ce que vous trouverez ici</h2>
+<p>Ligne Rouge couvre l'actualité politique, économique, technologique, culturelle et sportive avec une attention particulière portée au continent africain et à ses enjeux dans un monde globalisé. Nos rubriques incluent :</p>
+<ul>
+<li><strong>Politique & International</strong> — Analyses géopolitiques et décryptages institutionnels</li>
+<li><strong>Économie</strong> — Marchés, indicateurs macroéconomiques, fintech</li>
+<li><strong>Technologie</strong> — Innovation, startups, transformation numérique</li>
+<li><strong>Société & Culture</strong> — Enjeux sociétaux, arts, éducation</li>
+<li><strong>Sport</strong> — Résultats, analyses tactiques, événements majeurs</li>
+</ul>
+<h2>Un engagement pour la transparence</h2>
+<p>Nous publions notre <a href="/ethics">charte éthique</a> en toute transparence. Notre processus de vérification des faits, nos politiques de correction et nos engagements déontologiques sont accessibles à tous. C'est la condition sine qua non de la confiance.</p>
+<p>Bienvenue sur Ligne Rouge. L'information commence ici.</p>`,
+    category: categories[0],
+    categorySlug: "actualite",
+    author: authors[0],
+    authorSlug: "khaled",
+    image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1200&auto=format&fit=crop",
+    imageCaption: "La rédaction de Ligne Rouge",
+    publishedAt: "2026-05-14T12:00:00Z",
+    readTime: 5,
+    views: 0,
+    status: "published",
+    featured: true,
+    breaking: false,
+    tags: ["éditorial", "ligne rouge", "lancement", "journalisme"],
+    locale: "fr",
+  },
+  {
     id: "art-1",
     slug: "nouveaux-enjeux-geopolitiques-afrique-ouest",
     title: "Nouveaux enjeux géopolitiques en Afrique de l'Ouest : vers un nouvel ordre régional",
@@ -21,8 +61,8 @@ export const articles: Article[] = [
 <p>La communauté internationale observe attentivement ces développements, consciente que la stabilité de l'Afrique de l'Ouest est cruciale pour l'équilibre global.</p>`,
     category: categories[1],
     categorySlug: "politique",
-    author: authors[1],
-    authorSlug: "moussa-keita",
+    author: authors[0],
+    authorSlug: "khaled",
     image: "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=1200&auto=format&fit=crop",
     imageCaption: "Vue aérienne de Dakar, Sénégal",
     publishedAt: "2026-05-12T08:00:00Z",
@@ -51,7 +91,7 @@ export const articles: Article[] = [
     category: categories[5],
     categorySlug: "sport",
     author: authors[0],
-    authorSlug: "aminata-diallo",
+    authorSlug: "khaled",
     image: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop",
     imageCaption: "Stade de Dakar lors d'un match international",
     publishedAt: "2026-05-11T10:30:00Z",
@@ -80,8 +120,8 @@ export const articles: Article[] = [
 <p>Malgré ces avancées, des défis persistent : l'accès au financement pour les startups en phase précoce, la connectivité dans les zones rurales et la rétention des talents face à la concurrence internationale restent des enjeux majeurs.</p>`,
     category: categories[4],
     categorySlug: "technologie",
-    author: authors[2],
-    authorSlug: "fatou-sow",
+    author: authors[0],
+    authorSlug: "khaled",
     image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1200&auto=format&fit=crop",
     imageCaption: "Le Parc Numérique de Diamniadio",
     publishedAt: "2026-05-10T14:00:00Z",
@@ -109,8 +149,8 @@ export const articles: Article[] = [
 <p>Au-delà de sa dimension culturelle, la Biennale génère des retombées économiques significatives : tourisme culturel, marché de l'art, formation professionnelle et rayonnement international de la destination Sénégal.</p>`,
     category: categories[7],
     categorySlug: "culture",
-    author: authors[4],
-    authorSlug: "aissatou-ba",
+    author: authors[0],
+    authorSlug: "khaled",
     image: "https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?q=80&w=1200&auto=format&fit=crop",
     imageCaption: "Installation artistique lors de Dak'Art 2026",
     publishedAt: "2026-05-09T09:00:00Z",
@@ -138,8 +178,8 @@ export const articles: Article[] = [
 <p>Le sommet a également mis en lumière les innovations vertes développées sur le continent : solutions de stockage d'énergie, agriculture résiliente, systèmes d'alerte précoce et technologies de dessalement alimentées par le solaire.</p>`,
     category: categories[2],
     categorySlug: "international",
-    author: authors[1],
-    authorSlug: "moussa-keita",
+    author: authors[0],
+    authorSlug: "khaled",
     image: "https://images.unsplash.com/photo-1444653300305-64505342738d?q=80&w=1200&auto=format&fit=crop",
     imageCaption: "Sommet sur le climat - Session plénière",
     publishedAt: "2026-05-08T11:00:00Z",
@@ -165,8 +205,8 @@ export const articles: Article[] = [
 <p>Les entreprises locales et les investisseurs étrangers augmentent leurs engagements dans la région. Les IDE ont progressé de 23% par rapport à l'année précédente, avec des secteurs comme les infrastructures, l'énergie et l'agroalimentaire en tête.</p>`,
     category: categories[3],
     categorySlug: "economie",
-    author: authors[3],
-    authorSlug: "ibrahim-toure",
+    author: authors[0],
+    authorSlug: "khaled",
     image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1200&auto=format&fit=crop",
     imageCaption: "Centre financier de Lagos",
     publishedAt: "2026-05-07T07:30:00Z",
@@ -192,8 +232,8 @@ export const articles: Article[] = [
 <p>La clé du succès réside dans la formation des enseignants. Plus de 10 000 professeurs ont été formés aux outils numériques pédagogiques, avec un programme de mentorat continu.</p>`,
     category: categories[6],
     categorySlug: "societe",
-    author: authors[2],
-    authorSlug: "fatou-sow",
+    author: authors[0],
+    authorSlug: "khaled",
     image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1200&auto=format&fit=crop",
     imageCaption: "Élèves utilisant des tablettes numériques",
     publishedAt: "2026-05-06T13:00:00Z",
@@ -219,7 +259,7 @@ export const articles: Article[] = [
     category: categories[0],
     categorySlug: "actualite",
     author: authors[0],
-    authorSlug: "aminata-diallo",
+    authorSlug: "khaled",
     image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?q=80&w=1200&auto=format&fit=crop",
     imageCaption: "Signature de l'accord à Abuja",
     publishedAt: "2026-05-13T16:00:00Z",
@@ -245,8 +285,8 @@ export const articles: Article[] = [
 <blockquote>« L'Afrique a l'opportunité unique de développer une IA éthique dès le départ, sans reproduire les erreurs des pionniers », souligne Dr. Ousmane Mbaye, chercheur en éthique de l'IA.</blockquote>`,
     category: categories[4],
     categorySlug: "technologie",
-    author: authors[2],
-    authorSlug: "fatou-sow",
+    author: authors[0],
+    authorSlug: "khaled",
     image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1200&auto=format&fit=crop",
     imageCaption: "Laboratoire de recherche en IA à Dakar",
     publishedAt: "2026-05-05T10:00:00Z",
@@ -271,8 +311,8 @@ export const articles: Article[] = [
 <p>Des forums citoyens ont été organisés dans toutes les régions du pays pour recueillir les avis et propositions de la population. Cette approche participative est saluée par les organisations de la société civile.</p>`,
     category: categories[1],
     categorySlug: "politique",
-    author: authors[1],
-    authorSlug: "moussa-keita",
+    author: authors[0],
+    authorSlug: "khaled",
     image: "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=1200&auto=format&fit=crop",
     imageCaption: "Assemblée nationale du Sénégal",
     publishedAt: "2026-05-04T08:00:00Z",
