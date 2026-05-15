@@ -136,3 +136,44 @@ html {
 .dark ::-webkit-scrollbar-thumb {
   background: #3a3a4e;
 }
+
+/* Slide-in animation */
+@keyframes slide-in-from-bottom {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation: slide-in-from-bottom 0.2s ease-out;
+}
+
+.slide-in-from-bottom-2 {
+  animation: slide-in-from-bottom 0.2s ease-out;
+}
+
+/* Skip to content (accessibility) */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: #C01D35;
+  color: white;
+  font-weight: bold;
+  font-size: 0.875rem;
+}
+
+.skip-to-content:focus {
+  left: 0;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

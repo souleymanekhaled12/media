@@ -1,6 +1,8 @@
 import { HeroSection } from "@/components/articles/HeroSection";
 import { ArticleCard } from "@/components/articles/ArticleCard";
-import { Newsletter } from "@/components/articles/Newsletter";
+import { NewsletterPreferences } from "@/components/articles/NewsletterPreferences";
+import { FinanceWidget } from "@/components/widgets/FinanceWidget";
+import { WeatherWidget } from "@/components/widgets/WeatherWidget";
 import { getLatestArticles, getArticlesByCategory } from "@/lib/data/articles";
 import { categories } from "@/lib/data/categories";
 import Link from "next/link";
@@ -47,7 +49,17 @@ export default function HomePage() {
         <CategorySection title="Politique" slug="politique" articles={politiqueArticles} />
       )}
 
-      <Newsletter />
+      {/* Sidebar widgets */}
+      <section className="py-10 bg-white dark:bg-[#1a1a2e]">
+        <div className="max-w-[1320px] mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <FinanceWidget />
+            <WeatherWidget />
+          </div>
+        </div>
+      </section>
+
+      <NewsletterPreferences />
 
       {techArticles.length > 0 && (
         <CategorySection title="Technologie" slug="technologie" articles={techArticles} />
