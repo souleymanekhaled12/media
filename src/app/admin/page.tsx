@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   BarChart3,
@@ -16,16 +16,93 @@ import {
   Trash2,
   AlertTriangle,
   Zap,
+  Database,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
-import { articles } from "@/lib/data/articles";
-import { categories } from "@/lib/data/categories";
+import { articles as localArticles } from "@/lib/data/articles";
+import { categories as localCategories } from "@/lib/data/categories";
 import { Logo } from "@/components/layout/Logo";
 
-export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "articles" | "comments" | "analytics" | "breaking">("dashboard");
+interface DbArticle {
+  id: string;
+  slug: string;
+  title: string;
+  status: string;
+  featured: boolean;
+  breaking: boolean;
+  readTime: number;
+  views: number;
+  publishedAt: string | null;
+  createdAt: string;
+  author: { id: string; name: string; avatar: string | null };
+  category: { id: string; name: string; slug: string; color: string };
+}
 
-  const totalViews = articles.reduce((sum, a) => sum + a.views, 0);
-  const publishedCount = articles.filter((a) => a.status === "published").length;
+type TabId = "dashboard" | "articles" | "comments" | "analytics" | "breaking";
+
+export default function AdminDashboard() {
+  const [activeTab, setActiveTab] = useState<TabId>("dashboard");
+  const [dbArticles, setDbArticles] = useState<DbArticle[]>([]);
+  const [dbConnected, setDbConnected] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchArticles = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/articles?limit=100");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.articles && data.articles.length > 0) {
+          setDbArticles(data.articles);
+          setDbConnected(true);
+          setLoading(false);
+          return;
+        }
+      }
+    } catch {
+      // fallback
+    }
+    setDbConnected(false);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!cancelled) await fetchArticles();
+    })();
+    return () => { cancelled = true; };
+  }, [fetchArticles]);
+
+  const displayArticles = dbConnected
+    ? dbArticles.map((a) => ({
+        id: a.id,
+        title: a.title,
+        slug: a.slug,
+        categoryName: a.category.name,
+        categoryColor: a.category.color,
+        authorName: a.author.name,
+        readTime: a.readTime,
+        views: a.views,
+        status: a.status.toLowerCase(),
+        featured: a.featured,
+      }))
+    : localArticles.map((a) => ({
+        id: a.id,
+        title: a.title,
+        slug: a.slug,
+        categoryName: a.category.name,
+        categoryColor: a.category.color,
+        authorName: a.author.name,
+        readTime: a.readTime,
+        views: a.views,
+        status: a.status,
+        featured: a.featured,
+      }));
+
+  const totalViews = displayArticles.reduce((sum, a) => sum + a.views, 0);
+  const publishedCount = displayArticles.filter((a) => a.status === "published").length;
 
   const tabs = [
     { id: "dashboard" as const, label: "Dashboard", icon: BarChart3 },
@@ -38,7 +115,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#F2F1EE] dark:bg-[#0f0f1a]">
       {/* Admin Header */}
-      <div className="bg-[#0D1B2A] text-white px-6 py-3 flex items-center justify-between">
+      <div className="bg-[#0D1B2A] text-white px-4 sm:px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Logo variant="white" />
           <span className="text-xs font-semibold uppercase tracking-wider text-white/50 border-l border-white/20 pl-4">
@@ -46,6 +123,16 @@ export default function AdminDashboard() {
           </span>
         </div>
         <div className="flex items-center gap-3">
+          {dbConnected !== null && (
+            <span className={`text-[0.65rem] font-semibold uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1.5 ${
+              dbConnected
+                ? "bg-green-600/20 text-green-400"
+                : "bg-yellow-600/20 text-yellow-400"
+            }`}>
+              <Database className="w-3 h-3" />
+              {dbConnected ? "DB connectée" : "Mode local"}
+            </span>
+          )}
           <Link
             href="/"
             className="text-xs text-white/60 hover:text-white transition-colors"
@@ -57,7 +144,7 @@ export default function AdminDashboard() {
 
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-56 bg-white dark:bg-[#1a1a2e] border-r border-[#DEDBD4] dark:border-[#2a2a3e] min-h-[calc(100vh-52px)] p-4">
+        <div className="w-56 bg-white dark:bg-[#1a1a2e] border-r border-[#DEDBD4] dark:border-[#2a2a3e] min-h-[calc(100vh-52px)] p-4 shrink-0 hidden md:block">
           <nav className="space-y-1">
             {tabs.map((tab) => (
               <button
@@ -83,58 +170,105 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* Mobile tab bar */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-[#1a1a2e] border-t border-[#DEDBD4] dark:border-[#2a2a3e] flex z-50">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 flex flex-col items-center gap-1 py-2 text-[0.6rem] font-medium transition-colors ${
+                activeTab === tab.id
+                  ? "text-[#C01D35]"
+                  : "text-[#7A7A7A]"
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         {/* Main content */}
-        <div className="flex-1 p-8">
-          {activeTab === "dashboard" && (
-            <DashboardView totalViews={totalViews} publishedCount={publishedCount} />
+        <div className="flex-1 p-4 sm:p-8 pb-20 md:pb-8">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-6 h-6 animate-spin text-[#C01D35]" />
+            </div>
+          ) : (
+            <>
+              {activeTab === "dashboard" && (
+                <DashboardView
+                  totalViews={totalViews}
+                  publishedCount={publishedCount}
+                  articles={displayArticles}
+                  dbConnected={dbConnected}
+                  onSeed={async () => {
+                    await fetch("/api/admin/seed", { method: "POST" });
+                    fetchArticles();
+                  }}
+                />
+              )}
+              {activeTab === "articles" && (
+                <ArticlesView
+                  articles={displayArticles}
+                  dbConnected={dbConnected}
+                  onDelete={async (id) => {
+                    if (!dbConnected) return;
+                    await fetch(`/api/admin/articles/${id}`, { method: "DELETE" });
+                    fetchArticles();
+                  }}
+                  onRefresh={fetchArticles}
+                />
+              )}
+              {activeTab === "comments" && <CommentsView />}
+              {activeTab === "analytics" && <AnalyticsView totalViews={totalViews} articles={displayArticles} />}
+              {activeTab === "breaking" && <BreakingNewsView />}
+            </>
           )}
-          {activeTab === "articles" && <ArticlesView />}
-          {activeTab === "comments" && <CommentsView />}
-          {activeTab === "analytics" && <AnalyticsView totalViews={totalViews} />}
-          {activeTab === "breaking" && <BreakingNewsView />}
         </div>
       </div>
     </div>
   );
 }
 
+interface DisplayArticle {
+  id: string;
+  title: string;
+  slug: string;
+  categoryName: string;
+  categoryColor: string;
+  authorName: string;
+  readTime: number;
+  views: number;
+  status: string;
+  featured: boolean;
+}
+
 function DashboardView({
   totalViews,
   publishedCount,
+  articles,
+  dbConnected,
+  onSeed,
 }: {
   totalViews: number;
   publishedCount: number;
+  articles: DisplayArticle[];
+  dbConnected: boolean | null;
+  onSeed: () => Promise<void>;
 }) {
+  const [seeding, setSeeding] = useState(false);
+
   const stats = [
-    {
-      label: "Articles publiés",
-      value: publishedCount,
-      icon: FileText,
-      color: "#C01D35",
-    },
-    {
-      label: "Vues totales",
-      value: totalViews.toLocaleString("fr-FR"),
-      icon: Eye,
-      color: "#1B4F72",
-    },
-    {
-      label: "Catégories",
-      value: categories.length,
-      icon: BarChart3,
-      color: "#0E6655",
-    },
-    {
-      label: "Commentaires",
-      value: 48,
-      icon: MessageSquare,
-      color: "#B7950B",
-    },
+    { label: "Articles publiés", value: publishedCount, icon: FileText, color: "#C01D35" },
+    { label: "Vues totales", value: totalViews.toLocaleString("fr-FR"), icon: Eye, color: "#1B4F72" },
+    { label: "Catégories", value: localCategories.length, icon: BarChart3, color: "#0E6655" },
+    { label: "Commentaires", value: 48, icon: MessageSquare, color: "#B7950B" },
   ];
 
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <h1 className="font-serif text-2xl font-bold text-[#0D1B2A] dark:text-white">
           Tableau de bord
         </h1>
@@ -147,19 +281,38 @@ function DashboardView({
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {dbConnected === false && (
+        <div className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+          <p className="text-sm font-semibold text-yellow-800 dark:text-yellow-400 mb-2">
+            Mode local — Base de données non synchronisée
+          </p>
+          <p className="text-xs text-yellow-700 dark:text-yellow-500 mb-3">
+            Le CMS fonctionne avec les données locales. Pour activer la création d&apos;articles en direct, initialisez la base de données Supabase.
+          </p>
+          <button
+            onClick={async () => { setSeeding(true); await onSeed(); setSeeding(false); }}
+            disabled={seeding}
+            className="bg-yellow-600 text-white text-xs font-bold px-4 py-2 rounded hover:bg-yellow-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            {seeding ? <Loader2 className="w-3 h-3 animate-spin" /> : <Database className="w-3 h-3" />}
+            {seeding ? "Initialisation..." : "Synchroniser avec Supabase"}
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="bg-white dark:bg-[#1a1a2e] rounded-lg border border-[#DEDBD4] dark:border-[#2a2a3e] p-5"
+            className="bg-white dark:bg-[#1a1a2e] rounded-lg border border-[#DEDBD4] dark:border-[#2a2a3e] p-4 sm:p-5"
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-[#7A7A7A] uppercase tracking-wider">
+              <span className="text-[0.65rem] sm:text-xs font-semibold text-[#7A7A7A] uppercase tracking-wider">
                 {stat.label}
               </span>
               <stat.icon className="w-4 h-4" style={{ color: stat.color }} />
             </div>
-            <div className="font-serif text-2xl font-bold text-[#0D1B2A] dark:text-white">
+            <div className="font-serif text-xl sm:text-2xl font-bold text-[#0D1B2A] dark:text-white">
               {stat.value}
             </div>
           </div>
@@ -167,7 +320,7 @@ function DashboardView({
       </div>
 
       <div className="bg-white dark:bg-[#1a1a2e] rounded-lg border border-[#DEDBD4] dark:border-[#2a2a3e]">
-        <div className="p-5 border-b border-[#DEDBD4] dark:border-[#2a2a3e]">
+        <div className="p-4 sm:p-5 border-b border-[#DEDBD4] dark:border-[#2a2a3e]">
           <h2 className="font-serif font-bold text-[#0D1B2A] dark:text-white">
             Derniers articles
           </h2>
@@ -180,8 +333,8 @@ function DashboardView({
                   {article.title}
                 </h3>
                 <div className="flex items-center gap-3 mt-1 text-xs text-[#7A7A7A]">
-                  <span className="text-[#C01D35] font-semibold">{article.category.name}</span>
-                  <span>{article.author.name}</span>
+                  <span className="text-[#C01D35] font-semibold">{article.categoryName}</span>
+                  <span>{article.authorName}</span>
                   <span className="flex items-center gap-1">
                     <Eye className="w-3 h-3" />
                     {article.views.toLocaleString("fr-FR")}
@@ -189,8 +342,12 @@ function DashboardView({
                 </div>
               </div>
               <div className="flex items-center gap-2 ml-4">
-                <span className="text-[0.68rem] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                  {article.status === "published" ? "Publié" : article.status}
+                <span className={`text-[0.68rem] font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${
+                  article.status === "published"
+                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                    : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                }`}>
+                  {article.status === "published" ? "Publié" : "Brouillon"}
                 </span>
               </div>
             </div>
@@ -201,20 +358,45 @@ function DashboardView({
   );
 }
 
-function ArticlesView() {
+function ArticlesView({
+  articles,
+  dbConnected,
+  onDelete,
+  onRefresh,
+}: {
+  articles: DisplayArticle[];
+  dbConnected: boolean | null;
+  onDelete: (id: string) => Promise<void>;
+  onRefresh: () => void;
+}) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filtered = searchQuery
+    ? articles.filter((a) => a.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    : articles;
+
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <h1 className="font-serif text-2xl font-bold text-[#0D1B2A] dark:text-white">
           Articles
         </h1>
-        <Link
-          href="/admin/articles/new"
-          className="bg-[#C01D35] text-white text-sm font-bold px-4 py-2.5 rounded-lg hover:bg-[#A01728] transition-colors flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Nouvel article
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onRefresh}
+            className="text-[#7A7A7A] hover:text-[#0D1B2A] dark:hover:text-white transition-colors p-2"
+            title="Rafraîchir"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+          <Link
+            href="/admin/articles/new"
+            className="bg-[#C01D35] text-white text-sm font-bold px-4 py-2.5 rounded-lg hover:bg-[#A01728] transition-colors flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Nouvel article
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-[#1a1a2e] rounded-lg border border-[#DEDBD4] dark:border-[#2a2a3e]">
@@ -223,21 +405,23 @@ function ArticlesView() {
             <Search className="w-4 h-4 text-[#7A7A7A]" />
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher un article..."
               className="flex-1 text-sm bg-transparent outline-none text-[#1A1A1A] dark:text-white"
             />
           </div>
         </div>
         <div className="divide-y divide-[#DEDBD4] dark:divide-[#2a2a3e]">
-          {articles.map((article) => (
+          {filtered.map((article) => (
             <div key={article.id} className="p-4 flex items-center justify-between hover:bg-[#F2F1EE] dark:hover:bg-[#12121e] transition-colors">
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-sm text-[#1A1A1A] dark:text-white truncate">
                   {article.title}
                 </h3>
-                <div className="flex items-center gap-3 mt-1 text-xs text-[#7A7A7A]">
-                  <span className="text-[#C01D35] font-semibold">{article.category.name}</span>
-                  <span>{article.author.name}</span>
+                <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-[#7A7A7A]">
+                  <span className="text-[#C01D35] font-semibold">{article.categoryName}</span>
+                  <span>{article.authorName}</span>
                   <span className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {article.readTime} min
@@ -249,18 +433,44 @@ function ArticlesView() {
                 </div>
               </div>
               <div className="flex items-center gap-2 ml-4">
-                <span className="text-[0.68rem] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                  Publié
+                <span className={`text-[0.68rem] font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${
+                  article.status === "published"
+                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                    : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                }`}>
+                  {article.status === "published" ? "Publié" : "Brouillon"}
                 </span>
-                <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-[#DEDBD4] dark:hover:bg-[#3a3a4e] transition-colors text-[#7A7A7A]">
-                  <Edit className="w-4 h-4" />
-                </button>
-                <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-[#7A7A7A] hover:text-red-600">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                {dbConnected && (
+                  <>
+                    <Link
+                      href={`/article/${article.slug}`}
+                      className="w-8 h-8 flex items-center justify-center rounded hover:bg-[#DEDBD4] dark:hover:bg-[#3a3a4e] transition-colors text-[#7A7A7A]"
+                      title="Voir"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Link>
+                    <button
+                      onClick={() => onDelete(article.id)}
+                      className="w-8 h-8 flex items-center justify-center rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-[#7A7A7A] hover:text-red-600"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+                {!dbConnected && (
+                  <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-[#DEDBD4] dark:hover:bg-[#3a3a4e] transition-colors text-[#7A7A7A]">
+                    <Edit className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           ))}
+          {filtered.length === 0 && (
+            <div className="p-8 text-center text-sm text-[#7A7A7A]">
+              Aucun article trouvé
+            </div>
+          )}
         </div>
       </div>
     </>
@@ -287,15 +497,13 @@ function CommentsView() {
                 <span className="font-semibold text-sm text-[#0D1B2A] dark:text-white">{comment.author}</span>
                 <span className="text-xs text-[#7A7A7A]">sur « {comment.article} »</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className={`text-[0.68rem] font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${
-                  comment.approved
-                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                    : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                }`}>
-                  {comment.approved ? "Approuvé" : "En attente"}
-                </span>
-              </div>
+              <span className={`text-[0.68rem] font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${
+                comment.approved
+                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                  : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+              }`}>
+                {comment.approved ? "Approuvé" : "En attente"}
+              </span>
             </div>
             <p className="text-sm text-[#4A4A4A] dark:text-[#a0a0b0] mb-2">{comment.content}</p>
             <span className="text-xs text-[#7A7A7A]">{comment.date}</span>
@@ -306,10 +514,8 @@ function CommentsView() {
   );
 }
 
-function AnalyticsView({ totalViews }: { totalViews: number }) {
-  const topArticles = [...articles]
-    .sort((a, b) => b.views - a.views)
-    .slice(0, 5);
+function AnalyticsView({ totalViews, articles }: { totalViews: number; articles: DisplayArticle[] }) {
+  const topArticles = [...articles].sort((a, b) => b.views - a.views).slice(0, 5);
 
   return (
     <>
@@ -317,12 +523,12 @@ function AnalyticsView({ totalViews }: { totalViews: number }) {
         Analytics
       </h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
         <div className="bg-white dark:bg-[#1a1a2e] rounded-lg border border-[#DEDBD4] dark:border-[#2a2a3e] p-6">
           <h3 className="font-semibold text-sm text-[#7A7A7A] uppercase tracking-wider mb-4">
             Vues totales
           </h3>
-          <div className="font-serif text-4xl font-bold text-[#0D1B2A] dark:text-white mb-2">
+          <div className="font-serif text-3xl sm:text-4xl font-bold text-[#0D1B2A] dark:text-white mb-2">
             {totalViews.toLocaleString("fr-FR")}
           </div>
           <div className="flex items-center gap-1 text-sm text-green-600">
@@ -335,7 +541,7 @@ function AnalyticsView({ totalViews }: { totalViews: number }) {
           <h3 className="font-semibold text-sm text-[#7A7A7A] uppercase tracking-wider mb-4">
             Engagement moyen
           </h3>
-          <div className="font-serif text-4xl font-bold text-[#0D1B2A] dark:text-white mb-2">
+          <div className="font-serif text-3xl sm:text-4xl font-bold text-[#0D1B2A] dark:text-white mb-2">
             4m 32s
           </div>
           <div className="flex items-center gap-1 text-sm text-green-600">
@@ -361,7 +567,7 @@ function AnalyticsView({ totalViews }: { totalViews: number }) {
                 <h3 className="font-semibold text-sm text-[#1A1A1A] dark:text-white truncate">
                   {article.title}
                 </h3>
-                <span className="text-xs text-[#7A7A7A]">{article.category.name}</span>
+                <span className="text-xs text-[#7A7A7A]">{article.categoryName}</span>
               </div>
               <div className="text-right">
                 <div className="font-bold text-sm text-[#0D1B2A] dark:text-white">
