@@ -32,7 +32,7 @@ export default function SearchPage() {
 
   return (
     <div className="py-12 lg:py-16">
-      <div className="max-w-[1320px] mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="max-w-[680px] mx-auto mb-12">
           <h1 className="font-serif text-3xl lg:text-4xl font-extrabold text-[#0D1B2A] dark:text-white mb-6 text-center">
             Rechercher

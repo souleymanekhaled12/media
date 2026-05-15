@@ -57,18 +57,18 @@ export function BreakingBanner() {
           : "bg-yellow-500 text-black"
       }`}
     >
-      <div className="max-w-[1320px] mx-auto px-6 py-2 flex items-center gap-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex items-center gap-2 sm:gap-3">
         <AlertTriangle className="w-4 h-4 shrink-0 animate-pulse" />
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden min-w-0">
           {alert.url ? (
             <a
               href={alert.url}
-              className="text-xs font-bold tracking-wide hover:underline block truncate"
+              className="text-[0.7rem] sm:text-xs font-bold tracking-wide hover:underline block truncate"
             >
               {alert.message}
             </a>
           ) : (
-            <span className="text-xs font-bold tracking-wide block truncate">
+            <span className="text-[0.7rem] sm:text-xs font-bold tracking-wide block truncate">
               {alert.message}
             </span>
           )}

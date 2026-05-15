@@ -142,6 +142,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     fill
                     className="object-cover"
                     sizes="44px"
+                    quality={100}
+                    unoptimized
                   />
                 </div>
                 <div>
@@ -254,7 +256,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         {/* Related articles */}
         {related.length > 0 && (
           <section className="py-12 bg-[#F2F1EE] dark:bg-[#0f0f1a]">
-            <div className="max-w-[1320px] mx-auto px-6">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
               <div className="flex items-center mb-6 pb-3 border-b-2 border-[#DEDBD4] dark:border-[#2a2a3e]">
                 <h2 className="font-serif text-xl font-bold text-[#0D1B2A] dark:text-white flex items-center gap-2.5">
                   <span className="w-[3px] h-5 bg-[#C01D35] rounded-sm block shrink-0" />

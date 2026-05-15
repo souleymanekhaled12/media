@@ -11,59 +11,61 @@ export const metadata: Metadata = {
 };
 
 export default function TeamPage() {
-  const khaled = authors[0];
-  const khaledArticles = articles.filter(
-    (a) => a.authorSlug === khaled.slug
+  const editor = authors[0];
+  const editorArticles = articles.filter(
+    (a) => a.authorSlug === editor.slug
   );
 
   return (
-    <div className="py-16 bg-white dark:bg-[#1a1a2e]">
-      <div className="max-w-[900px] mx-auto px-6">
-        <div className="text-center mb-16">
+    <div className="py-12 sm:py-16 bg-white dark:bg-[#1a1a2e]">
+      <div className="max-w-[900px] mx-auto px-4 sm:px-6">
+        <div className="text-center mb-12 sm:mb-16">
           <span className="inline-block text-[#C01D35] text-xs font-bold tracking-[0.12em] uppercase mb-4">
             Rédaction
           </span>
-          <h1 className="font-serif text-4xl lg:text-5xl font-extrabold text-[#0D1B2A] dark:text-white leading-tight mb-6">
+          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#0D1B2A] dark:text-white leading-tight mb-6">
             Le Rédacteur en Chef
           </h1>
-          <p className="text-lg text-[#4A4A4A] dark:text-[#a0a0b0] leading-relaxed max-w-[600px] mx-auto">
+          <p className="text-base sm:text-lg text-[#4A4A4A] dark:text-[#a0a0b0] leading-relaxed max-w-[600px] mx-auto">
             L&apos;homme derrière Ligne Rouge — rigueur journalistique et
             maîtrise technologique au service de l&apos;information publique.
           </p>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8 items-center md:items-start p-8 rounded-xl border border-[#DEDBD4] dark:border-[#2a2a3e] bg-[#F2F1EE] dark:bg-[#12121e] mb-12">
+        <div className="flex flex-col md:flex-row gap-6 sm:gap-8 items-center md:items-start p-5 sm:p-8 rounded-xl border border-[#DEDBD4] dark:border-[#2a2a3e] bg-[#F2F1EE] dark:bg-[#12121e] mb-12">
           <div className="relative w-48 h-48 md:w-56 md:h-56 rounded-xl overflow-hidden shrink-0 shadow-lg">
             <Image
-              src={khaled.avatar}
-              alt={khaled.name}
+              src={editor.avatar}
+              alt={editor.name}
               fill
               className="object-cover"
-              sizes="224px"
+              sizes="(max-width: 768px) 192px, 224px"
+              quality={100}
               priority
+              unoptimized
             />
           </div>
           <div className="flex-1 text-center md:text-left">
-            <h2 className="font-serif text-3xl font-extrabold text-[#0D1B2A] dark:text-white mb-1">
-              {khaled.name}
+            <h2 className="font-serif text-2xl sm:text-3xl font-extrabold text-[#0D1B2A] dark:text-white mb-1">
+              {editor.name}
             </h2>
             <span className="inline-block text-xs font-bold text-[#C01D35] uppercase tracking-wider mb-4">
-              {khaled.role}
+              {editor.role}
             </span>
-            <p className="text-base text-[#4A4A4A] dark:text-[#a0a0b0] leading-relaxed mb-6">
-              {khaled.bio}
+            <p className="text-sm sm:text-base text-[#4A4A4A] dark:text-[#a0a0b0] leading-relaxed mb-6">
+              {editor.bio}
             </p>
-            <div className="flex items-center justify-center md:justify-start gap-6 text-sm">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6 text-sm">
               <span className="font-bold text-[#0D1B2A] dark:text-white">
-                {khaledArticles.length}{" "}
+                {editorArticles.length}{" "}
                 <span className="font-normal text-[#7A7A7A]">
-                  article{khaledArticles.length !== 1 ? "s" : ""} publiés
+                  article{editorArticles.length !== 1 ? "s" : ""} publiés
                 </span>
               </span>
               <div className="flex items-center gap-3">
-                {khaled.social?.twitter && (
+                {editor.social?.twitter && (
                   <a
-                    href={khaled.social.twitter}
+                    href={editor.social.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#7A7A7A] hover:text-[#1DA1F2] transition-colors font-bold"
@@ -72,9 +74,9 @@ export default function TeamPage() {
                     𝕏
                   </a>
                 )}
-                {khaled.social?.linkedin && (
+                {editor.social?.linkedin && (
                   <a
-                    href={khaled.social.linkedin}
+                    href={editor.social.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#7A7A7A] hover:text-[#0077B5] transition-colors font-bold"
@@ -96,11 +98,11 @@ export default function TeamPage() {
             </h2>
           </div>
           <div className="space-y-3">
-            {khaledArticles.slice(0, 5).map((article) => (
+            {editorArticles.slice(0, 5).map((article) => (
               <Link
                 key={article.id}
                 href={`/article/${article.slug}`}
-                className="flex items-center justify-between p-4 rounded-lg border border-[#DEDBD4] dark:border-[#2a2a3e] bg-white dark:bg-[#1a1a2e] hover:border-[#C01D35] transition-all group"
+                className="flex items-center justify-between p-3 sm:p-4 rounded-lg border border-[#DEDBD4] dark:border-[#2a2a3e] bg-white dark:bg-[#1a1a2e] hover:border-[#C01D35] transition-all group"
               >
                 <div className="flex-1 min-w-0">
                   <span className="text-[#C01D35] text-xs font-semibold uppercase tracking-wider">
@@ -118,7 +120,7 @@ export default function TeamPage() {
           </div>
         </div>
 
-        <div className="text-center p-8 rounded-lg bg-[#0D1B2A] text-white">
+        <div className="text-center p-6 sm:p-8 rounded-lg bg-[#0D1B2A] text-white">
           <h2 className="font-serif text-xl font-bold mb-3">
             Contacter la rédaction
           </h2>

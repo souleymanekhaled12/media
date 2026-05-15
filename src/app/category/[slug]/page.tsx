@@ -37,7 +37,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <div className="py-12 lg:py-16">
-      <div className="max-w-[1320px] mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mb-10">
           <div
             className="w-12 h-1 rounded mb-4"

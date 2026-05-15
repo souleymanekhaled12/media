@@ -7,7 +7,7 @@ import { navCategories } from "@/config/site";
 export function Footer() {
   return (
     <footer className="bg-white dark:bg-[#1a1a2e] border-t border-[#DEDBD4] dark:border-[#2a2a3e] pt-20 pb-10" role="contentinfo">
-      <div className="max-w-[1320px] mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           <div>
             <div className="mb-5">

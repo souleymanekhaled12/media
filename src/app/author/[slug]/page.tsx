@@ -36,7 +36,7 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
 
   return (
     <div className="py-12 lg:py-16">
-      <div className="max-w-[1320px] mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex flex-col sm:flex-row items-start gap-6 mb-12">
           <div className="relative w-24 h-24 rounded-full overflow-hidden shrink-0">
             <Image
@@ -45,6 +45,8 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
               fill
               className="object-cover"
               sizes="96px"
+              quality={100}
+              unoptimized
             />
           </div>
           <div>
