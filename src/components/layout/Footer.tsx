@@ -50,6 +50,12 @@ export function Footer() {
               <Link href="/about" className="text-sm text-[#4A4A4A] dark:text-[#a0a0b0] hover:text-[#C01D35] transition-colors">
                 Qui sommes-nous
               </Link>
+              <Link href="/team" className="text-sm text-[#4A4A4A] dark:text-[#a0a0b0] hover:text-[#C01D35] transition-colors">
+                Notre équipe
+              </Link>
+              <Link href="/ethics" className="text-sm text-[#4A4A4A] dark:text-[#a0a0b0] hover:text-[#C01D35] transition-colors">
+                Charte éthique
+              </Link>
               <Link href="/contact" className="text-sm text-[#4A4A4A] dark:text-[#a0a0b0] hover:text-[#C01D35] transition-colors">
                 Contact
               </Link>

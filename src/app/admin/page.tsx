@@ -14,13 +14,15 @@ import {
   Clock,
   Edit,
   Trash2,
+  AlertTriangle,
+  Zap,
 } from "lucide-react";
 import { articles } from "@/lib/data/articles";
 import { categories } from "@/lib/data/categories";
 import { Logo } from "@/components/layout/Logo";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "articles" | "comments" | "analytics">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "articles" | "comments" | "analytics" | "breaking">("dashboard");
 
   const totalViews = articles.reduce((sum, a) => sum + a.views, 0);
   const publishedCount = articles.filter((a) => a.status === "published").length;
@@ -30,6 +32,7 @@ export default function AdminDashboard() {
     { id: "articles" as const, label: "Articles", icon: FileText },
     { id: "comments" as const, label: "Commentaires", icon: MessageSquare },
     { id: "analytics" as const, label: "Analytics", icon: TrendingUp },
+    { id: "breaking" as const, label: "Breaking News", icon: Zap },
   ];
 
   return (
@@ -88,6 +91,7 @@ export default function AdminDashboard() {
           {activeTab === "articles" && <ArticlesView />}
           {activeTab === "comments" && <CommentsView />}
           {activeTab === "analytics" && <AnalyticsView totalViews={totalViews} />}
+          {activeTab === "breaking" && <BreakingNewsView />}
         </div>
       </div>
     </div>
@@ -368,6 +372,119 @@ function AnalyticsView({ totalViews }: { totalViews: number }) {
             </div>
           ))}
         </div>
+      </div>
+    </>
+  );
+}
+
+function BreakingNewsView() {
+  const [message, setMessage] = useState("");
+  const [url, setUrl] = useState("");
+  const [priority, setPriority] = useState<"high" | "medium">("high");
+  const [sent, setSent] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+    try {
+      await fetch("/api/breaking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, url, priority }),
+      });
+      setSent(true);
+      setMessage("");
+      setUrl("");
+      setTimeout(() => setSent(false), 3000);
+    } catch {
+      // handle error
+    }
+  };
+
+  return (
+    <>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="font-serif text-2xl font-bold text-[#0D1B2A] dark:text-white flex items-center gap-3">
+          <AlertTriangle className="w-6 h-6 text-[#C01D35]" />
+          Breaking News
+        </h1>
+      </div>
+
+      <div className="bg-white dark:bg-[#1a1a2e] rounded-lg border border-[#DEDBD4] dark:border-[#2a2a3e] p-6 mb-6">
+        <h2 className="font-bold text-sm text-[#0D1B2A] dark:text-white mb-4">
+          Publier une alerte urgente
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-xs font-semibold text-[#7A7A7A] uppercase tracking-wider block mb-1">
+              Message d&apos;alerte
+            </label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="ALERTE — Description de l'événement..."
+              rows={2}
+              className="w-full text-sm px-3 py-2 border border-[#DEDBD4] dark:border-[#3a3a4e] rounded bg-transparent text-[#1A1A1A] dark:text-white outline-none focus:border-[#C01D35] transition-colors resize-none"
+              required
+            />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-[#7A7A7A] uppercase tracking-wider block mb-1">
+                Lien (optionnel)
+              </label>
+              <input
+                type="text"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="/article/slug-de-larticle"
+                className="w-full text-sm px-3 py-2 border border-[#DEDBD4] dark:border-[#3a3a4e] rounded bg-transparent text-[#1A1A1A] dark:text-white outline-none focus:border-[#C01D35] transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-[#7A7A7A] uppercase tracking-wider block mb-1">
+                Priorité
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPriority("high")}
+                  className={`flex-1 text-sm py-2 rounded font-semibold transition-colors ${
+                    priority === "high"
+                      ? "bg-[#C01D35] text-white"
+                      : "border border-[#DEDBD4] dark:border-[#3a3a4e] text-[#7A7A7A]"
+                  }`}
+                >
+                  Haute
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPriority("medium")}
+                  className={`flex-1 text-sm py-2 rounded font-semibold transition-colors ${
+                    priority === "medium"
+                      ? "bg-yellow-500 text-black"
+                      : "border border-[#DEDBD4] dark:border-[#3a3a4e] text-[#7A7A7A]"
+                  }`}
+                >
+                  Moyenne
+                </button>
+              </div>
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="bg-[#C01D35] text-white text-sm font-bold px-6 py-2.5 rounded-lg hover:bg-[#A01728] transition-colors flex items-center gap-2"
+          >
+            <Zap className="w-4 h-4" />
+            Publier l&apos;alerte
+          </button>
+        </form>
+
+        {sent && (
+          <div className="mt-4 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 text-sm font-medium p-3 rounded">
+            Alerte publiée avec succès
+          </div>
+        )}
       </div>
     </>
   );

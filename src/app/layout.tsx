@@ -4,6 +4,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Ticker } from "@/components/layout/Ticker";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { NewsroomStatus } from "@/components/layout/NewsroomStatus";
+import { BreakingBanner } from "@/components/layout/BreakingBanner";
 import { siteConfig } from "@/config/site";
 import "./globals.css";
 
@@ -109,12 +111,20 @@ export default function RootLayout({
                 "https://twitter.com/lignerouge",
                 "https://facebook.com/lignerouge",
               ],
+              ethicsPolicy: `${siteConfig.url}/ethics`,
+              correctionsPolicy: `${siteConfig.url}/ethics#corrections`,
+              verificationFactCheckingPolicy: `${siteConfig.url}/ethics#fact-checking`,
             }),
           }}
         />
       </head>
       <body className="min-h-screen flex flex-col bg-[#F2F1EE] dark:bg-[#0f0f1a] text-[#1A1A1A] dark:text-[#E8E4DC] font-sans">
+        <a href="#main-content" className="skip-to-content">
+          Aller au contenu principal
+        </a>
         <ThemeProvider>
+          <NewsroomStatus />
+          <BreakingBanner />
           <Ticker />
           <Header />
           <main className="flex-1" id="main-content">

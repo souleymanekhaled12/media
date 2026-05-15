@@ -6,6 +6,9 @@ import { fr } from "date-fns/locale";
 import { Eye, Share2, Bookmark, ArrowLeft } from "lucide-react";
 import { getArticleBySlug, getRelatedArticles, articles } from "@/lib/data/articles";
 import { ArticleCard } from "@/components/articles/ArticleCard";
+import { CommentSection } from "@/components/articles/CommentSection";
+import { ReadingProgress } from "@/components/articles/ReadingProgress";
+import { FloatingShare } from "@/components/articles/FloatingShare";
 import { siteConfig } from "@/config/site";
 import type { Metadata } from "next";
 
@@ -50,6 +53,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const related = getRelatedArticles(article);
 
+  const articleUrl = `${siteConfig.url}/article/${article.slug}`;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -63,24 +68,43 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         "@type": "Person",
         name: article.author.name,
         url: `${siteConfig.url}/author/${article.author.slug}`,
+        jobTitle: article.author.role,
       },
     ],
     publisher: {
       "@type": "NewsMediaOrganization",
       name: siteConfig.name,
       url: siteConfig.url,
+      logo: { "@type": "ImageObject", url: `${siteConfig.url}/logo.png` },
     },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `${siteConfig.url}/article/${article.slug}`,
-    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl },
+    articleSection: article.category.name,
+    keywords: article.tags.join(", "),
+    wordCount: article.body.split(/\s+/).length,
+    isAccessibleForFree: true,
+  };
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: siteConfig.url },
+      { "@type": "ListItem", position: 2, name: article.category.name, item: `${siteConfig.url}/category/${article.categorySlug}` },
+      { "@type": "ListItem", position: 3, name: article.title, item: articleUrl },
+    ],
   };
 
   return (
     <>
+      <ReadingProgress />
+      <FloatingShare title={article.title} url={articleUrl} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
       <article>
@@ -193,6 +217,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </div>
               </div>
             )}
+
+            <CommentSection articleSlug={article.slug} />
 
             {/* Author bio */}
             <div className="mt-12 p-6 rounded-lg border border-[#DEDBD4] dark:border-[#2a2a3e] bg-[#F2F1EE] dark:bg-[#12121e]">
