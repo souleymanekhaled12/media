@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Save, Eye, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Eye, Loader2, CheckCircle2, X } from "lucide-react";
 import { Logo } from "@/components/layout/Logo";
 
 interface DbCategory {
@@ -39,6 +39,8 @@ export default function NewArticlePage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
   const [dbConnected, setDbConnected] = useState<boolean | null>(null);
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [savedSlug, setSavedSlug] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -109,15 +111,21 @@ export default function NewArticlePage() {
         }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error || "Erreur lors de la sauvegarde");
       }
 
       setSaved(true);
-      setTimeout(() => setSaved(false), 4000);
+      setSavedSlug(data.article?.slug || null);
+      setToast({ type: "success", message: "Succ\u00e8s : L\u2019article a \u00e9t\u00e9 publi\u00e9 avec succ\u00e8s !" });
+      setTimeout(() => { setSaved(false); setToast(null); }, 5000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue");
+      const msg = err instanceof Error ? err.message : "Erreur inconnue";
+      setError(msg);
+      setToast({ type: "error", message: msg });
+      setTimeout(() => setToast(null), 5000);
     } finally {
       setSaving(false);
     }
@@ -191,8 +199,16 @@ export default function NewArticlePage() {
               </div>
             )}
             {saved && (
-              <div className="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 text-sm text-green-700 dark:text-green-400">
-                Article sauvegardé avec succès !
+              <div className="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 text-sm text-green-700 dark:text-green-400 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span className="font-semibold">Succès : L&apos;article a été publié avec succès !</span>
+                </div>
+                {savedSlug && (
+                  <Link href={`/article/${savedSlug}`} className="text-xs font-bold underline hover:no-underline ml-4">
+                    Voir l&apos;article →
+                  </Link>
+                )}
               </div>
             )}
 
@@ -390,7 +406,7 @@ export default function NewArticlePage() {
                   ) : (
                     <Save className="w-4 h-4" />
                   )}
-                  {saving ? "Sauvegarde..." : "Sauvegarder"}
+                  {saving ? "Publication en cours..." : status === "published" ? "Publier" : "Sauvegarder"}
                 </button>
               </div>
             </div>
@@ -420,6 +436,23 @@ export default function NewArticlePage() {
           </>
         )}
       </div>
+
+      {/* Toast notification */}
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg shadow-2xl text-sm font-semibold text-white animate-slide-up ${
+          toast.type === "success" ? "bg-green-600" : "bg-red-600"
+        }`}>
+          {toast.type === "success" ? (
+            <CheckCircle2 className="w-5 h-5" />
+          ) : (
+            <X className="w-5 h-5" />
+          )}
+          {toast.message}
+          <button onClick={() => setToast(null)} className="ml-2 hover:opacity-70">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
