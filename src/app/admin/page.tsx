@@ -19,6 +19,7 @@ import {
   Database,
   Loader2,
   RefreshCw,
+  LogOut,
 } from "lucide-react";
 import { articles as localArticles } from "@/lib/data/articles";
 import { categories as localCategories } from "@/lib/data/categories";
@@ -139,6 +140,16 @@ export default function AdminDashboard() {
           >
             ← Voir le site
           </Link>
+          <button
+            onClick={async () => {
+              await fetch("/api/auth/logout", { method: "POST" });
+              window.location.href = "/login";
+            }}
+            className="text-xs text-white/60 hover:text-red-400 transition-colors flex items-center gap-1"
+          >
+            <LogOut className="w-3 h-3" />
+            Déconnexion
+          </button>
         </div>
       </div>
 
@@ -163,10 +174,13 @@ export default function AdminDashboard() {
           </nav>
 
           <div className="mt-8 pt-4 border-t border-[#DEDBD4] dark:border-[#2a2a3e]">
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#4A4A4A] dark:text-[#a0a0b0] hover:bg-[#F2F1EE] dark:hover:bg-[#2a2a3e] transition-all">
+            <Link
+              href="/admin/settings"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#4A4A4A] dark:text-[#a0a0b0] hover:bg-[#F2F1EE] dark:hover:bg-[#2a2a3e] transition-all"
+            >
               <Settings className="w-4 h-4" />
               Paramètres
-            </button>
+            </Link>
           </div>
         </div>
 
