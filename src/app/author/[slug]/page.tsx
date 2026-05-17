@@ -1,38 +1,50 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { ArticleCard } from "@/components/articles/ArticleCard";
-import { articles } from "@/lib/data/articles";
-import { getAuthorBySlug, authors } from "@/lib/data/authors";
+import { getPublishedArticles } from "@/lib/db/articles";
+import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
 
 interface AuthorPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  return authors.map((a) => ({ slug: a.slug }));
+async function findAuthorBySlug(slug: string) {
+  const users = await prisma.user.findMany({
+    where: { role: { in: ["ADMIN", "AUTHOR", "EDITOR"] } },
+  });
+  return users.find((u) => {
+    const userSlug = (u.name || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    return userSlug === slug;
+  });
 }
 
 export async function generateMetadata({ params }: AuthorPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const author = getAuthorBySlug(slug);
+  const author = await findAuthorBySlug(slug);
   if (!author) return {};
 
   return {
     title: `${author.name} — ${author.role}`,
-    description: author.bio,
+    description: author.bio || undefined,
   };
 }
 
 export default async function AuthorPage({ params }: AuthorPageProps) {
   const { slug } = await params;
-  const author = getAuthorBySlug(slug);
+  const author = await findAuthorBySlug(slug);
 
   if (!author) notFound();
 
-  const authorArticles = articles
-    .filter((a) => a.authorSlug === slug && a.status === "published")
-    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+  const allPublished = await getPublishedArticles(100);
+  const authorArticles = allPublished.filter((a) => a.author.id === author.id);
 
   return (
     <div className="py-12 lg:py-16">
@@ -40,8 +52,8 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
         <div className="flex flex-col sm:flex-row items-start gap-6 mb-12">
           <div className="relative w-24 h-24 rounded-full overflow-hidden shrink-0">
             <Image
-              src={author.avatar}
-              alt={author.name}
+              src={author.avatar || "/images/team/alassane-ibraima.jpg"}
+              alt={author.name || "Rédaction"}
               fill
               className="object-cover"
               sizes="96px"

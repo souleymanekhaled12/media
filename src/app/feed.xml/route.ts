@@ -1,13 +1,10 @@
-import { articles } from "@/lib/data/articles";
+import { getPublishedArticles } from "@/lib/db/articles";
 import { siteConfig } from "@/config/site";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
-  const publishedArticles = articles
-    .filter((a) => a.status === "published")
-    .sort(
-      (a, b) =>
-        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-    );
+  const publishedArticles = await getPublishedArticles(50);
 
   const escapeXml = (str: string) =>
     str

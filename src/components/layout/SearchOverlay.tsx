@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { Search, X } from "lucide-react";
-import { searchArticles } from "@/lib/data/articles";
+import { Search, X, Loader2 } from "lucide-react";
+
+interface SearchResult {
+  id: string;
+  slug: string;
+  title: string;
+  category: { name: string };
+}
 
 interface SearchOverlayProps {
   open: boolean;
@@ -12,14 +18,10 @@ interface SearchOverlayProps {
 
 export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
   const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const results = useMemo(() => {
-    if (query.length >= 2) {
-      return searchArticles(query);
-    }
-    return [];
-  }, [query]);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const handleOpen = useCallback(() => {
     if (open) {
@@ -32,6 +34,30 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
   }, [handleOpen]);
 
   useEffect(() => {
+    if (query.length < 2) {
+      setResults([]);
+      return;
+    }
+    setSearching(true);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setResults(data.articles || []);
+        }
+      } catch {
+        // silent
+      }
+      setSearching(false);
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query]);
+
+  useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
@@ -41,6 +67,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 
   const handleClose = () => {
     setQuery("");
+    setResults([]);
     onClose();
   };
 
@@ -58,7 +85,11 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
     >
       <div className="bg-white dark:bg-[#1a1a2e] rounded-lg p-6 w-full max-w-[680px] mx-6 shadow-2xl">
         <div className="flex items-center border-2 border-[#CCCAC3] dark:border-[#3a3a4e] rounded overflow-hidden transition-colors focus-within:border-[#0D1B2A] dark:focus-within:border-[#C01D35]">
-          <Search className="w-5 h-5 ml-4 text-[#7A7A7A] shrink-0" />
+          {searching ? (
+            <Loader2 className="w-5 h-5 ml-4 text-[#7A7A7A] shrink-0 animate-spin" />
+          ) : (
+            <Search className="w-5 h-5 ml-4 text-[#7A7A7A] shrink-0" />
+          )}
           <input
             ref={inputRef}
             type="text"
@@ -97,7 +128,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
           </div>
         )}
 
-        {query.length >= 2 && results.length === 0 && (
+        {query.length >= 2 && !searching && results.length === 0 && (
           <p className="mt-5 text-[#7A7A7A] text-center py-4">
             Aucun résultat pour « {query} »
           </p>

@@ -1,20 +1,18 @@
 import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/articles/ArticleCard";
-import { getArticlesByCategory } from "@/lib/data/articles";
-import { getCategoryBySlug, categories } from "@/lib/data/categories";
+import { getArticlesByCategoryFromDb } from "@/lib/db/articles";
+import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  return categories.map((cat) => ({ slug: cat.slug }));
-}
-
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await prisma.category.findUnique({ where: { slug } });
   if (!category) return {};
 
   return {
@@ -22,18 +20,18 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
     description: category.description,
     openGraph: {
       title: `${category.name} | Ligne Rouge`,
-      description: category.description,
+      description: category.description || undefined,
     },
   };
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await prisma.category.findUnique({ where: { slug } });
 
   if (!category) notFound();
 
-  const categoryArticles = getArticlesByCategory(slug);
+  const categoryArticles = await getArticlesByCategoryFromDb(slug, 50);
 
   return (
     <div className="py-12 lg:py-16">

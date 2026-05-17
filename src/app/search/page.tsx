@@ -1,22 +1,38 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { ArticleCard } from "@/components/articles/ArticleCard";
-import { searchArticles, getLatestArticles } from "@/lib/data/articles";
+import type { Article } from "@/types";
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
   const [query, setQuery] = useState(initialQuery);
   const [submittedQuery, setSubmittedQuery] = useState(initialQuery);
+  const [results, setResults] = useState<Article[]>([]);
+  const [latestArticles, setLatestArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const results = useMemo(() => {
-    if (submittedQuery.length >= 2) {
-      return searchArticles(submittedQuery);
+  useEffect(() => {
+    fetch("/api/articles?limit=6")
+      .then((r) => r.json())
+      .then((data) => setLatestArticles(data.articles || []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (submittedQuery.length < 2) {
+      setResults([]);
+      return;
     }
-    return [];
+    setLoading(true);
+    fetch(`/api/search?q=${encodeURIComponent(submittedQuery)}`)
+      .then((r) => r.json())
+      .then((data) => setResults(data.articles || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [submittedQuery]);
 
   const hasSearched = submittedQuery.length >= 2;
@@ -28,8 +44,6 @@ export default function SearchPage() {
     }
   };
 
-  const latestArticles = getLatestArticles(6);
-
   return (
     <div className="py-12 lg:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -40,7 +54,11 @@ export default function SearchPage() {
 
           <form onSubmit={handleSearch}>
             <div className="flex items-center border-2 border-[#CCCAC3] dark:border-[#3a3a4e] rounded-lg overflow-hidden transition-colors focus-within:border-[#0D1B2A] dark:focus-within:border-[#C01D35]">
-              <Search className="w-5 h-5 ml-4 text-[#7A7A7A] shrink-0" />
+              {loading ? (
+                <Loader2 className="w-5 h-5 ml-4 text-[#7A7A7A] shrink-0 animate-spin" />
+              ) : (
+                <Search className="w-5 h-5 ml-4 text-[#7A7A7A] shrink-0" />
+              )}
               <input
                 type="text"
                 placeholder="Rechercher un article, un sujet, un auteur..."

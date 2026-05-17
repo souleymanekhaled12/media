@@ -4,7 +4,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Eye, Share2, Bookmark, ArrowLeft } from "lucide-react";
-import { getArticleBySlug, getRelatedArticles, articles } from "@/lib/data/articles";
+import { getArticleBySlugFromDb, getRelatedArticlesFromDb, getAllPublishedSlugs } from "@/lib/db/articles";
 import { ArticleCard } from "@/components/articles/ArticleCard";
 import { CommentSection } from "@/components/articles/CommentSection";
 import { ReadingProgress } from "@/components/articles/ReadingProgress";
@@ -16,13 +16,12 @@ interface ArticlePageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  return articles.map((article) => ({ slug: article.slug }));
-}
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getArticleBySlugFromDb(slug);
   if (!article) return {};
 
   return {
@@ -47,11 +46,11 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getArticleBySlugFromDb(slug);
 
   if (!article) notFound();
 
-  const related = getRelatedArticles(article);
+  const related = await getRelatedArticlesFromDb(article.id, article.category.id, 3);
 
   const articleUrl = `${siteConfig.url}/article/${article.slug}`;
 
