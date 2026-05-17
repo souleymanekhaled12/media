@@ -21,8 +21,7 @@ import {
   RefreshCw,
   LogOut,
 } from "lucide-react";
-import { articles as localArticles } from "@/lib/data/articles";
-import { categories as localCategories } from "@/lib/data/categories";
+
 import { Logo } from "@/components/layout/Logo";
 
 interface DbArticle {
@@ -51,20 +50,22 @@ export default function AdminDashboard() {
   const fetchArticles = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/articles?limit=100");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.articles && data.articles.length > 0) {
-          setDbArticles(data.articles);
-          setDbConnected(true);
-          setLoading(false);
-          return;
+      const [healthRes, articlesRes] = await Promise.all([
+        fetch("/api/health"),
+        fetch("/api/admin/articles?limit=100"),
+      ]);
+      if (healthRes.ok) {
+        setDbConnected(true);
+        if (articlesRes.ok) {
+          const data = await articlesRes.json();
+          setDbArticles(data.articles || []);
         }
+      } else {
+        setDbConnected(false);
       }
     } catch {
-      // fallback
+      setDbConnected(false);
     }
-    setDbConnected(false);
     setLoading(false);
   }, []);
 
@@ -76,31 +77,18 @@ export default function AdminDashboard() {
     return () => { cancelled = true; };
   }, [fetchArticles]);
 
-  const displayArticles = dbConnected
-    ? dbArticles.map((a) => ({
-        id: a.id,
-        title: a.title,
-        slug: a.slug,
-        categoryName: a.category.name,
-        categoryColor: a.category.color,
-        authorName: a.author.name,
-        readTime: a.readTime,
-        views: a.views,
-        status: a.status.toLowerCase(),
-        featured: a.featured,
-      }))
-    : localArticles.map((a) => ({
-        id: a.id,
-        title: a.title,
-        slug: a.slug,
-        categoryName: a.category.name,
-        categoryColor: a.category.color,
-        authorName: a.author.name,
-        readTime: a.readTime,
-        views: a.views,
-        status: a.status,
-        featured: a.featured,
-      }));
+  const displayArticles = dbArticles.map((a) => ({
+    id: a.id,
+    title: a.title,
+    slug: a.slug,
+    categoryName: a.category.name,
+    categoryColor: a.category.color,
+    authorName: a.author.name,
+    readTime: a.readTime,
+    views: a.views,
+    status: a.status.toLowerCase(),
+    featured: a.featured,
+  }));
 
   const totalViews = displayArticles.reduce((sum, a) => sum + a.views, 0);
   const publishedCount = displayArticles.filter((a) => a.status === "published").length;
@@ -276,7 +264,7 @@ function DashboardView({
   const stats = [
     { label: "Articles publiés", value: publishedCount, icon: FileText, color: "#C01D35" },
     { label: "Vues totales", value: totalViews.toLocaleString("fr-FR"), icon: Eye, color: "#1B4F72" },
-    { label: "Catégories", value: localCategories.length, icon: BarChart3, color: "#0E6655" },
+    { label: "Catégories", value: "—", icon: BarChart3, color: "#0E6655" },
     { label: "Commentaires", value: 48, icon: MessageSquare, color: "#B7950B" },
   ];
 

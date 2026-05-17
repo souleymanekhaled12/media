@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchArticles } from "@/lib/data/articles";
+import { searchArticlesInDb } from "@/lib/db/articles";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q");
@@ -8,7 +10,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ articles: [], total: 0, query: query || "" });
   }
 
-  const results = searchArticles(query);
+  const results = await searchArticlesInDb(query);
 
   return NextResponse.json({
     articles: results,

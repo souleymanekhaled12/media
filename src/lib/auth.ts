@@ -4,7 +4,7 @@ import crypto from "crypto";
 const SESSION_COOKIE = "lr_admin_session";
 const SESSION_MAX_AGE = 7 * 24 * 60 * 60; // 7 days in seconds
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "alassane.ibraima@lignerouge.info";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "ibrahimaalassane2016@gmail.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "LigneRouge2026!";
 
 const activeSessions = new Set<string>();

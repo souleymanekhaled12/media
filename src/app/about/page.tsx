@@ -1,7 +1,9 @@
 import Image from "next/image";
-import { authors } from "@/lib/data/authors";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "À propos",
@@ -9,8 +11,19 @@ export const metadata: Metadata = {
     "Découvrez Ligne Rouge, votre plateforme d'information internationale indépendante.",
 };
 
-export default function AboutPage() {
-  const editor = authors[0];
+export default async function AboutPage() {
+  const editor = await prisma.user.findFirst({
+    where: { role: "ADMIN" },
+  });
+
+  const editorSlug = editor
+    ? (editor.name || "redaction")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+    : "redaction";
 
   return (
     <div className="py-10 lg:py-16">
@@ -69,40 +82,44 @@ export default function AboutPage() {
           </ul>
         </div>
 
-        <div className="mb-6 pb-3 border-b-2 border-[#DEDBD4] dark:border-[#2a2a3e]">
-          <h2 className="font-serif text-xl font-bold text-[#0D1B2A] dark:text-white flex items-center gap-2.5">
-            <span className="w-[3px] h-5 bg-[#C01D35] rounded-sm block shrink-0" />
-            Le Rédacteur en Chef
-          </h2>
-        </div>
-
-        <Link
-          href={`/author/${editor.slug}`}
-          className="flex flex-col sm:flex-row items-center sm:items-start gap-6 p-5 sm:p-6 rounded-xl border border-[#DEDBD4] dark:border-[#2a2a3e] hover:border-[#C01D35] hover:shadow-md transition-all group"
-        >
-          <div className="relative w-32 h-32 rounded-xl overflow-hidden shrink-0">
-            <Image
-              src={editor.avatar}
-              alt={editor.name}
-              fill
-              className="object-cover"
-              sizes="128px"
-              quality={100}
-              unoptimized
-            />
-          </div>
-          <div className="text-center sm:text-left">
-            <h3 className="font-serif text-2xl font-bold text-[#0D1B2A] dark:text-white group-hover:text-[#C01D35] transition-colors">
-              {editor.name}
-            </h3>
-            <div className="text-xs text-[#C01D35] font-bold uppercase tracking-wider mb-3">
-              {editor.role}
+        {editor && (
+          <>
+            <div className="mb-6 pb-3 border-b-2 border-[#DEDBD4] dark:border-[#2a2a3e]">
+              <h2 className="font-serif text-xl font-bold text-[#0D1B2A] dark:text-white flex items-center gap-2.5">
+                <span className="w-[3px] h-5 bg-[#C01D35] rounded-sm block shrink-0" />
+                Le Rédacteur en Chef
+              </h2>
             </div>
-            <p className="text-sm text-[#4A4A4A] dark:text-[#a0a0b0] leading-relaxed">
-              {editor.bio}
-            </p>
-          </div>
-        </Link>
+
+            <Link
+              href={`/author/${editorSlug}`}
+              className="flex flex-col sm:flex-row items-center sm:items-start gap-6 p-5 sm:p-6 rounded-xl border border-[#DEDBD4] dark:border-[#2a2a3e] hover:border-[#C01D35] hover:shadow-md transition-all group"
+            >
+              <div className="relative w-32 h-32 rounded-xl overflow-hidden shrink-0">
+                <Image
+                  src={editor.avatar || "/images/team/alassane-ibraima.jpg"}
+                  alt={editor.name || "Rédacteur"}
+                  fill
+                  className="object-cover"
+                  sizes="128px"
+                  quality={100}
+                  unoptimized
+                />
+              </div>
+              <div className="text-center sm:text-left">
+                <h3 className="font-serif text-2xl font-bold text-[#0D1B2A] dark:text-white group-hover:text-[#C01D35] transition-colors">
+                  {editor.name}
+                </h3>
+                <div className="text-xs text-[#C01D35] font-bold uppercase tracking-wider mb-3">
+                  Rédacteur en Chef
+                </div>
+                <p className="text-sm text-[#4A4A4A] dark:text-[#a0a0b0] leading-relaxed">
+                  {editor.bio}
+                </p>
+              </div>
+            </Link>
+          </>
+        )}
       </div>
     </div>
   );

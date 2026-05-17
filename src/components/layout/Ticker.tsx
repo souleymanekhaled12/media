@@ -1,13 +1,32 @@
 "use client";
 
-import { getBreakingNews, getLatestArticles } from "@/lib/data/articles";
+import { useState, useEffect } from "react";
 
 export function Ticker() {
-  const breaking = getBreakingNews();
-  const latest = breaking.length > 0 ? breaking : getLatestArticles(5);
+  const [items, setItems] = useState<string[]>([]);
 
-  const items = latest.map((a) => a.title);
+  useEffect(() => {
+    async function loadHeadlines() {
+      try {
+        const res = await fetch("/api/articles?limit=5");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.articles && data.articles.length > 0) {
+            setItems(data.articles.map((a: { title: string }) => a.title));
+            return;
+          }
+        }
+      } catch {
+        // silent
+      }
+      setItems(["Bienvenue sur Ligne Rouge — Plateforme d'information internationale"]);
+    }
+    loadHeadlines();
+  }, []);
+
   const doubled = [...items, ...items];
+
+  if (items.length === 0) return null;
 
   return (
     <div
@@ -16,7 +35,7 @@ export function Ticker() {
       aria-label="Actualités défilantes"
     >
       <div className="bg-[#C01D35] text-white text-[0.68rem] sm:text-[0.72rem] font-bold tracking-wider uppercase px-2.5 sm:px-3.5 py-1 whitespace-nowrap shrink-0 h-full flex items-center z-10">
-        {breaking.length > 0 ? "⚡ Breaking" : "Flash Info"}
+        Flash Info
       </div>
       <div className="flex items-center w-full overflow-hidden flex-1 h-full">
         <div className="flex whitespace-nowrap animate-ticker hover:[animation-play-state:paused]">
